@@ -26,7 +26,7 @@ import {
   X,
 } from "lucide-react";
 import type { ElementType } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { activeBranches, compactPhone, money, Room, roomsByBranch } from "@/lib/tete-data";
 
@@ -87,11 +87,11 @@ export function LavieHomeApp() {
   const [activeBranchId, setActiveBranchId] = useState(activeBranches[0]?.id ?? 30);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
   const [modalRoom, setModalRoom] = useState<Room | null>(null);
-  const [heroIndex, setHeroIndex] = useState(0);
+  const bookingScrollRef = useRef<HTMLDivElement | null>(null);
   const branchRooms = useMemo(() => roomsByBranch(activeBranchId), [activeBranchId]);
   const featuredRooms = branchRooms.slice(0, 10);
-  const heroSlides = featuredRooms.slice(0, 5);
-  const heroRoom = heroSlides.length ? heroSlides[heroIndex % heroSlides.length] : branchRooms[0];
+  const heroMarqueeRooms = featuredRooms.slice(0, 8);
+  const heroLoopRooms = [...heroMarqueeRooms, ...heroMarqueeRooms];
   const calendarRooms = branchRooms.slice(0, 8);
   const currentBranch = activeBranches.find((branch) => branch.id === activeBranchId) ?? activeBranches[0];
   const dates = useMemo(() => makeDates(), []);
@@ -106,12 +106,10 @@ export function LavieHomeApp() {
   function switchBranch(branchId: number) {
     setActiveBranchId(branchId);
     setSelectedSlots([]);
-    setHeroIndex(0);
   }
 
-  function moveHero(direction: -1 | 1) {
-    if (heroSlides.length < 2) return;
-    setHeroIndex((current) => (current + direction + heroSlides.length) % heroSlides.length);
+  function scrollBooking(direction: -1 | 1) {
+    bookingScrollRef.current?.scrollBy({ left: direction * 420, behavior: "smooth" });
   }
 
   function toggleSlot(slot: SelectedSlot) {
@@ -185,58 +183,24 @@ export function LavieHomeApp() {
     <div id="top" className="site-shell text-white">
       <SiteHeader />
 
-      <main className="pt-24">
+      <main className="pt-[68px]">
         <section className="lavie-hero-section">
           <div className="lavie-hero-shell">
-            {heroRoom ? (
-              <div className="lavie-hero-media">
-                <Image
-                  key={heroRoom.id}
-                  src={heroRoom.main_image}
-                  alt={`${heroRoom.card_name} tại ${heroRoom.branch_name}`}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 54vw, 100vw"
-                  className="object-cover"
-                />
-                <div className="lavie-hero-shade" />
-              </div>
-            ) : null}
-
-            {heroSlides.length > 1 ? (
-              <div className="lavie-hero-carousel" aria-label="Chọn phòng nổi bật">
-                <button type="button" onClick={() => moveHero(-1)} aria-label="Ảnh trước">
-                  <ArrowLeft size={15} />
-                </button>
-                <div className="lavie-hero-dots">
-                  {heroSlides.map((room, index) => (
-                    <button
-                      key={room.id}
-                      type="button"
-                      className={index === heroIndex % heroSlides.length ? "is-active" : ""}
-                      onClick={() => setHeroIndex(index)}
-                      aria-label={`Xem ${room.card_name}`}
-                    />
-                  ))}
-                </div>
-                <button type="button" onClick={() => moveHero(1)} aria-label="Ảnh tiếp theo">
-                  <ArrowRight size={15} />
-                </button>
-              </div>
-            ) : null}
-
             <div className="lavie-hero-copy">
               <div className="lavie-hero-kicker">
                 <Sparkles size={15} />
-                Lavie Home self check-in
+                Lavie Home self check-in 24/7
               </div>
-              <h1>Nghỉ riêng tư, đặt phòng nhanh.</h1>
+              <h1>
+                Phòng nghỉ riêng tư,
+                <span> tự check-in 24/7.</span>
+              </h1>
               <p>
-                Xem phòng thật, chọn khung giờ còn trống và nhận hướng dẫn check-in 24/7 trên điện thoại.
+                Xem phòng thực tế, chọn giờ nghỉ linh hoạt và nhận thông tin phòng tự động qua điện thoại.
               </p>
               <div className="lavie-hero-actions">
                 <a className="primary-button px-6" href="#booking">
-                  <Bolt size={17} /> Đặt phòng ngay
+                  Đặt phòng ngay
                 </a>
                 <a className="lavie-hero-secondary" href="#rooms">
                   Xem phòng trống
@@ -244,58 +208,65 @@ export function LavieHomeApp() {
               </div>
             </div>
 
-            {heroRoom ? (
-              <div className="lavie-hero-booking">
-                <div className="lavie-hero-room">
-                  <span>Phòng gợi ý hôm nay</span>
-                  <strong>{heroRoom.card_name}</strong>
-                  <small>{heroRoom.branch_name}</small>
-                </div>
-                <div className="lavie-hero-booking-grid">
-                  <div>
-                    <CalendarDays size={16} />
-                    <span>Hôm nay</span>
-                  </div>
-                  <div>
-                    <MapPin size={16} />
-                    <span>{currentBranch?.name}</span>
-                  </div>
-                  <div>
-                    <ShieldCheck size={16} />
-                    <span>Từ {money(heroRoom.price_from)}đ</span>
-                  </div>
+            {heroLoopRooms.length ? (
+              <div className="lavie-hero-marquee" aria-label="Phòng nổi bật">
+                <div className="lavie-hero-marquee-track">
+                  {heroLoopRooms.map((room, index) => (
+                    <article key={`${room.id}-${index}`} className={`lavie-marquee-card variant-${index % 4}`}>
+                      <Image
+                        src={room.main_image}
+                        alt={`${room.card_name} tại ${room.branch_name}`}
+                        fill
+                        priority={index < 4}
+                        sizes="(min-width: 1024px) 210px, 150px"
+                        className="object-cover"
+                      />
+                      <span>{room.card_name.replace("Phòng ", "")}</span>
+                    </article>
+                  ))}
                 </div>
               </div>
             ) : null}
           </div>
         </section>
 
-        <section className="mx-auto w-[min(100%-2rem,1360px)] py-6">
-          <div className="section-card p-5 md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="eyebrow">Chi nhánh</p>
-                <h2 className="mt-2 max-w-2xl text-2xl font-extrabold leading-tight tracking-[-0.025em] md:text-4xl">Chọn nơi bạn muốn nghỉ</h2>
-              </div>
-              <p className="max-w-md text-sm font-semibold leading-6 text-white/62 md:text-[0.95rem]">
-                Chọn chi nhánh để xem phòng và lịch trống tương ứng.
-              </p>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {activeBranches.map((branch) => (
+        <section className="mx-auto w-[min(100%-2rem,1360px)] py-8">
+          <div className="mb-6">
+            <p className="eyebrow">Hệ thống cơ sở</p>
+            <h2 className="mt-2 text-2xl font-extrabold leading-tight tracking-[-0.025em] md:text-4xl">Chọn chi nhánh bạn muốn nghỉ</h2>
+            <p className="mt-3 max-w-[62ch] text-sm font-semibold leading-6 text-white/62 md:text-[0.95rem]">
+              Vui lòng chọn cơ sở cụ thể để cập nhật danh sách phòng và lịch trống theo thời gian thực.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {activeBranches.map((branch) => {
+              const parts = branch.name.split(" - ");
+              const city = parts[0];
+              const address = parts.slice(1).join(" - ") || "Chi nhánh";
+              const isSelected = activeBranchId === branch.id;
+              
+              return (
                 <button
                   key={branch.id}
-                  className={`rounded-full border px-4 py-2.5 text-[0.72rem] font-extrabold uppercase tracking-wide transition sm:text-xs ${
-                    activeBranchId === branch.id
-                      ? "border-pink-200 bg-pink-200 text-[#170913] lavie-glow"
-                      : "border-white/14 bg-white/7 text-white hover:-translate-y-0.5 hover:bg-white/11"
+                  className={`flex flex-col items-start text-left p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                    isSelected
+                      ? "border-pink-300 bg-gradient-to-br from-pink-500/20 to-yellow-500/5 text-white shadow-[0_0_20px_rgba(243,90,189,0.15)]"
+                      : "border-white/10 bg-white/5 text-white hover:-translate-y-0.5 hover:bg-white/8 hover:border-white/20"
                   }`}
                   onClick={() => switchBranch(branch.id)}
                 >
-                  {branch.name}
+                  <span className={`text-[0.66rem] font-extrabold uppercase tracking-wider mb-2 px-2.5 py-1 rounded-lg ${
+                    isSelected ? "bg-pink-500/30 text-pink-200" : "bg-white/10 text-white/60"
+                  }`}>
+                    {city}
+                  </span>
+                  <span className="text-sm font-bold leading-snug">
+                    {address}
+                  </span>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </section>
 
@@ -350,24 +321,34 @@ export function LavieHomeApp() {
           </div>
         </section>
 
-        <section id="booking" className="mx-auto w-[min(100%-2rem,1360px)] py-8">
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <section id="booking" className="mx-auto w-[min(100%-2rem,1360px)] scroll-mt-28 py-8">
+          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="eyebrow">Check-in tự động</p>
               <h2 className="mt-2 text-2xl font-extrabold leading-tight tracking-[-0.025em] md:text-4xl">Đặt phòng siêu tốc</h2>
             </div>
-            <p className="max-w-md text-sm font-semibold leading-6 text-white/62 md:text-[0.95rem]">Chọn khung giờ và ngày bạn muốn check-in bên dưới nhé.</p>
+            <div className="flex flex-col items-start gap-3 md:items-end">
+              <p className="max-w-md text-sm font-semibold leading-6 text-white/62 md:text-right md:text-[0.95rem]">Chọn khung giờ và ngày bạn muốn check-in bên dưới nhé.</p>
+              <div className="hidden gap-2 md:flex">
+                <button className="icon-button" onClick={() => scrollBooking(-1)} aria-label="Cuộn bảng sang trái">
+                  <ArrowLeft size={18} />
+                </button>
+                <button className="icon-button" onClick={() => scrollBooking(1)} aria-label="Cuộn bảng sang phải">
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-            <div className="glass-panel overflow-hidden rounded-3xl">
-              <div className="hide-scrollbar overflow-auto">
-                <table className="w-full min-w-[980px] border-collapse text-center text-xs">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="glass-panel booking-panel self-start rounded-3xl">
+              <div ref={bookingScrollRef} className="booking-scroll">
+                <table className="booking-table">
                   <thead>
                     <tr>
-                      <th className="sticky left-0 top-0 z-20 w-36 bg-[#281531] p-3 text-left text-white">Ngày / giờ</th>
+                      <th className="booking-date-head">Ngày / giờ</th>
                       {calendarRooms.map((room) => (
-                        <th key={room.id} className="sticky top-0 z-10 bg-[#281531] p-3 text-pink-100" data-room-name={room.card_name}>
+                        <th key={room.id} className="booking-room-head" data-room-name={room.card_name}>
                           {room.card_name.replace("Phòng ", "")}
                         </th>
                       ))}
@@ -377,7 +358,7 @@ export function LavieHomeApp() {
                     {dates.map((date, dayIndex) =>
                       slotLabels.map((slot, slotIndex) => (
                         <tr key={`${date.iso}-${slot}`}>
-                          <td className="sticky left-0 z-10 border-t border-white/10 bg-[#1b1024] p-3 text-left font-extrabold">
+                          <td className="booking-date-cell">
                             <span className="block text-yellow-200">{date.label}</span>
                             <span className="text-white/70">{slot}</span>
                           </td>
@@ -387,17 +368,17 @@ export function LavieHomeApp() {
                             const selected = selectedSlots.some((item) => item.id === id);
                             const discounted = slotIndex >= 2;
                             return (
-                              <td key={id} className="slot-cell border border-white/10 bg-[#1c1125] p-2">
+                              <td key={id} className="slot-cell">
                                 <button
                                   disabled={booked}
-                                  className={`h-11 w-full rounded-lg text-[0.66rem] font-extrabold transition ${
+                                  className={`booking-slot ${
                                     booked
-                                      ? "cursor-not-allowed bg-red-500 text-white"
+                                      ? "is-booked"
                                       : selected
-                                        ? "bg-yellow-300 text-slate-950 shadow-[0_0_16px_rgba(253,224,71,0.7)]"
+                                        ? "is-selected"
                                         : discounted
-                                          ? "bg-emerald-100 text-emerald-950 hover:bg-emerald-200"
-                                          : "bg-white text-slate-950 hover:bg-pink-100"
+                                          ? "is-discounted"
+                                          : "is-open"
                                   }`}
                                   onClick={() =>
                                     toggleSlot({
@@ -470,45 +451,10 @@ export function LavieHomeApp() {
           </div>
         </section>
 
-        <section id="guide" className="mx-auto w-[min(100%-2rem,1360px)] py-12">
-          <div className="grid gap-5 md:grid-cols-3">
-            {[
-              ["Dành cho khách hàng", "Tìm phòng phù hợp, chọn khung giờ, nhập thông tin và hoàn tất thanh toán."],
-              ["Check-in tự động", "Nhân viên kiểm tra thông tin và gửi hướng dẫn check-in qua số điện thoại đã đặt."],
-              ["Hỗ trợ phát sinh", "Liên hệ hotline hoặc Zalo từng chi nhánh để hủy đơn, đổi giờ hoặc nhận hỗ trợ."],
-            ].map(([title, body]) => (
-              <div key={title} className="section-card p-6">
-                <h3 className="text-base font-extrabold text-pink-200">{title}</h3>
-                <p className="mt-3 text-sm leading-6 text-white/68">{body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto w-[min(100%-2rem,1360px)] pb-20">
-          <div className="page-panel grid gap-5 p-6 md:grid-cols-2 md:p-8">
-            <div>
-              <h2 className="text-xl font-extrabold md:text-2xl">Chào mừng bạn đến với Lavie Home</h2>
-              <p className="mt-3 text-white/65">Hãy chọn mô hình bạn muốn book phòng.</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-pink-300/25 bg-pink-300/8 p-5">
-                <Home className="text-pink-200" />
-                <h3 className="mt-3 font-extrabold">Lavie Decor</h3>
-                <p className="mt-2 text-sm text-white/60">Đa dạng chủ đề phòng dành cho các cặp đôi.</p>
-              </div>
-              <a href="#booking" className="rounded-2xl border border-yellow-200/25 bg-yellow-200/8 p-5 transition hover:-translate-y-1">
-                <BedDouble className="text-yellow-200" />
-                <h3 className="mt-3 font-extrabold">Hotel Truyền Thống</h3>
-                <p className="mt-2 text-sm text-white/60">Phù hợp cho gia đình, kỳ nghỉ và ở lâu dài.</p>
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer className="border-t border-white/10 px-4 py-8 text-center text-sm text-white/55">
-        © 2025 Bản quyền thuộc về Lavie Home. Clone NextJS phục vụ demo giao diện.
+        © 2025 Lavie Home. Đặt phòng riêng tư, tự check-in 24/7.
       </footer>
 
       <div className="fixed bottom-7 right-5 z-40 hidden flex-col gap-3 md:flex">
