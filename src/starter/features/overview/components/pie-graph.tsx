@@ -2,29 +2,18 @@
 
 import { LabelList, Pie, PieChart } from 'recharts';
 
+import { Badge } from '@/starter/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/starter/components/ui/card';
+import { Icons } from '@/starter/components/icons';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
 } from '@/starter/components/ui/chart';
-import { Badge } from '@/starter/components/ui/badge';
-import { Icons } from '@/starter/components/icons';
-import { getBookingStatusSummary } from '@/lib/homestay-dashboard';
+import type { BookingStatusPoint } from '@/lib/homestay-dashboard';
 
-const statusColors = [
-  'var(--chart-1)',
-  'var(--chart-2)',
-  'var(--chart-3)',
-  'var(--chart-4)'
-];
-
-const chartData = getBookingStatusSummary(12).map((item, index) => ({
-  status: item.status,
-  count: item.count,
-  fill: statusColors[index] ?? 'var(--chart-5)'
-}));
+const statusColors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)'];
 
 const chartConfig = {
   count: {
@@ -48,7 +37,12 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function PieGraph() {
+export function PieGraph({ data }: { data: BookingStatusPoint[] }) {
+  const chartData = data.map((item, index) => ({
+    status: item.status,
+    count: item.count,
+    fill: statusColors[index] ?? 'var(--chart-5)'
+  }));
   const total = chartData.reduce((sum, item) => sum + item.count, 0);
   const confirmed = chartData.find((item) => item.status === 'Đã xác nhận')?.count ?? 0;
   const confirmedShare = total ? Math.round((confirmed / total) * 100) : 0;
@@ -63,7 +57,7 @@ export function PieGraph() {
             {confirmedShare}%
           </Badge>
         </CardTitle>
-        <CardDescription>Phân bổ booking theo trạng thái trong mẫu dữ liệu hiện tại.</CardDescription>
+        <CardDescription>Phân bổ booking theo trạng thái trong dữ liệu hiện tại.</CardDescription>
       </CardHeader>
       <CardContent className='flex flex-1 items-center justify-center pb-0'>
         <ChartContainer

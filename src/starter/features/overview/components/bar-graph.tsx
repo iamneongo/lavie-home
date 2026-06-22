@@ -2,18 +2,16 @@
 
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 
+import { Badge } from '@/starter/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/starter/components/ui/card';
+import { Icons } from '@/starter/components/icons';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
 } from '@/starter/components/ui/chart';
-import { Badge } from '@/starter/components/ui/badge';
-import { Icons } from '@/starter/components/icons';
-import { getPriceBands } from '@/lib/homestay-dashboard';
-
-const chartData = getPriceBands();
+import type { PriceBandPoint } from '@/lib/homestay-dashboard';
 
 const chartConfig = {
   count: {
@@ -22,7 +20,8 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function BarGraph() {
+export function BarGraph({ data }: { data: PriceBandPoint[] }) {
+  const chartData = data;
   const topBand = [...chartData].sort((a, b) => b.count - a.count)[0];
 
   return (
@@ -41,12 +40,7 @@ export function BarGraph() {
         <ChartContainer config={chartConfig}>
           <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} strokeDasharray='3 3' />
-            <XAxis
-              dataKey='label'
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-            />
+            <XAxis dataKey='label' tickLine={false} tickMargin={10} axisLine={false} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator='dashed' hideLabel />} />
             <Bar dataKey='count' fill='var(--color-count)' radius={4} />
           </BarChart>

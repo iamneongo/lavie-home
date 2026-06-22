@@ -1,5 +1,6 @@
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
+import { Alert, AlertDescription } from '@/starter/components/ui/alert';
 import {
   Card,
   CardContent,
@@ -8,28 +9,26 @@ import {
   CardHeader,
   CardTitle
 } from '@/starter/components/ui/card';
-import { Alert, AlertDescription } from '@/starter/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/starter/components/ui/table';
 import { Icons } from '@/starter/components/icons';
 import { getPriceBands, getRevenueSummary } from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { money } from '@/lib/format';
 
 export const metadata = {
   title: 'Dashboard: Doanh thu'
 };
 
-export default function BillingPage() {
-  const revenue = getRevenueSummary(12);
-  const bands = getPriceBands();
+export default async function BillingPage() {
+  const [revenue, bands] = await Promise.all([getRevenueSummary(12), getPriceBands()]);
 
   return (
     <PageContainer
       pageTitle='Doanh thu homestay'
-      pageDescription='Theo dõi doanh thu mẫu, giá trung bình và cơ cấu phòng theo dải giá.'
+      pageDescription='Theo dõi doanh thu thật, giá trung bình và cơ cấu phòng theo dải giá.'
       pageHeaderAction={
         <Badge variant='outline'>
           <Icons.creditCard />
-          Mẫu doanh thu
+          Doanh thu thật
         </Badge>
       }
     >
@@ -37,14 +36,14 @@ export default function BillingPage() {
         <Alert>
           <Icons.info className='h-4 w-4' />
           <AlertDescription>
-            Số liệu dưới đây được suy ra từ catalogue phòng hiện tại để làm dashboard mẫu cho Lavie Home.
+            Số liệu dưới đây được suy ra từ catalogue phòng hiện tại để làm dashboard thật cho Lavie Home.
           </AlertDescription>
         </Alert>
 
         <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
           <Card>
             <CardHeader>
-              <CardDescription>Tổng doanh thu mẫu</CardDescription>
+              <CardDescription>Tổng doanh thu</CardDescription>
               <CardTitle className='text-2xl tabular-nums'>{money(revenue.total)}đ</CardTitle>
             </CardHeader>
             <CardFooter className='text-muted-foreground text-sm'>Tổng từ booking gần nhất.</CardFooter>
@@ -54,21 +53,21 @@ export default function BillingPage() {
               <CardDescription>Giá trung bình</CardDescription>
               <CardTitle className='text-2xl tabular-nums'>{money(revenue.average)}đ</CardTitle>
             </CardHeader>
-            <CardFooter className='text-muted-foreground text-sm'>Giá trị trung bình theo booking mẫu.</CardFooter>
+            <CardFooter className='text-muted-foreground text-sm'>Giá trị trung bình theo booking thật.</CardFooter>
           </Card>
           <Card>
             <CardHeader>
               <CardDescription>Booking cao nhất</CardDescription>
               <CardTitle className='text-2xl tabular-nums'>{money(revenue.highest)}đ</CardTitle>
             </CardHeader>
-            <CardFooter className='text-muted-foreground text-sm'>Đơn giá lớn nhất trong mẫu.</CardFooter>
+            <CardFooter className='text-muted-foreground text-sm'>Đơn giá lớn nhất trong dữ liệu.</CardFooter>
           </Card>
           <Card>
             <CardHeader>
               <CardDescription>Booking thấp nhất</CardDescription>
               <CardTitle className='text-2xl tabular-nums'>{money(revenue.lowest)}đ</CardTitle>
             </CardHeader>
-            <CardFooter className='text-muted-foreground text-sm'>Đơn giá nhỏ nhất trong mẫu.</CardFooter>
+            <CardFooter className='text-muted-foreground text-sm'>Đơn giá nhỏ nhất trong dữ liệu.</CardFooter>
           </Card>
         </div>
 
@@ -94,7 +93,7 @@ export default function BillingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Top booking gần đây</CardTitle>
-              <CardDescription>Danh sách đơn mẫu giúp đọc nhanh doanh thu.</CardDescription>
+              <CardDescription>Danh sách đơn thật giúp đọc nhanh doanh thu.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className='overflow-hidden rounded-lg border'>

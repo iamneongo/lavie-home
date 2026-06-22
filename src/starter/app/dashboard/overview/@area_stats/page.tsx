@@ -1,8 +1,7 @@
-﻿import { delay } from '@/constants/mock-api';
 import { AreaGraph } from '@/starter/features/overview/components/area-graph';
+import { getTrendPoints } from '@/lib/homestay-dashboard';
 
 export default async function AreaStats() {
-  await delay(2000);
-  return <AreaGraph />;
+  const data = await getTrendPoints();
+  return <AreaGraph data={data} />;
 }
-

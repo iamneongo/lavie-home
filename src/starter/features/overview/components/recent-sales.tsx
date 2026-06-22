@@ -1,16 +1,16 @@
 import { Avatar, AvatarFallback } from '@/starter/components/ui/avatar';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/starter/components/ui/card';
 import { getBookingSnapshots } from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { money } from '@/lib/format';
 
-export function RecentSales() {
-  const bookings = getBookingSnapshots(6);
+export async function RecentSales() {
+  const bookings = await getBookingSnapshots(6);
 
   return (
     <Card className='h-full'>
       <CardHeader>
         <CardTitle>Booking gần đây</CardTitle>
-        <CardDescription>6 lượt đặt mẫu mới nhất theo dữ liệu catalogue hiện tại.</CardDescription>
+        <CardDescription>6 lượt đặt mới nhất từ PostgreSQL.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-6'>

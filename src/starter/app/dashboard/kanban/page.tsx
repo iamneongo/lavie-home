@@ -1,12 +1,6 @@
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/starter/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/starter/components/ui/card';
 import { Icons } from '@/starter/components/icons';
 import { getBookingSnapshots, getBookingStatusSummary } from '@/lib/homestay-dashboard';
 
@@ -14,9 +8,8 @@ export const metadata = {
   title: 'Dashboard: Vận hành'
 };
 
-export default function KanbanPage() {
-  const bookings = getBookingSnapshots(12);
-  const statuses = getBookingStatusSummary(12);
+export default async function KanbanPage() {
+  const [bookings, statuses] = await Promise.all([getBookingSnapshots(12), getBookingStatusSummary(12)]);
 
   return (
     <PageContainer

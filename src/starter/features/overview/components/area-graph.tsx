@@ -2,18 +2,16 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
+import { Badge } from '@/starter/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/starter/components/ui/card';
+import { Icons } from '@/starter/components/icons';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
 } from '@/starter/components/ui/chart';
-import { Badge } from '@/starter/components/ui/badge';
-import { Icons } from '@/starter/components/icons';
-import { getTrendPoints } from '@/lib/homestay-dashboard';
-
-const chartData = getTrendPoints();
+import type { TrendPoint } from '@/lib/homestay-dashboard';
 
 const chartConfig = {
   bookings: {
@@ -30,10 +28,11 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function AreaGraph() {
+export function AreaGraph({ data }: { data: TrendPoint[] }) {
+  const chartData = data;
   const first = chartData[0];
   const last = chartData[chartData.length - 1];
-  const growth = first ? Math.max(0, Math.round(((last.bookings - first.bookings) / Math.max(first.bookings, 1)) * 100)) : 0;
+  const growth = first && last ? Math.max(0, Math.round(((last.bookings - first.bookings) / Math.max(first.bookings, 1)) * 100)) : 0;
 
   return (
     <Card>
@@ -51,12 +50,7 @@ export function AreaGraph() {
         <ChartContainer config={chartConfig}>
           <AreaChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} strokeDasharray='3 3' />
-            <XAxis
-              dataKey='month'
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
+            <XAxis dataKey='month' tickLine={false} axisLine={false} tickMargin={8} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <defs>
               <DottedBackgroundPattern config={chartConfig} />
@@ -110,7 +104,7 @@ const DottedBackgroundPattern = ({ config }: { config: ChartConfig }) => {
           height='7'
           patternUnits='userSpaceOnUse'
         >
-          <circle cx='5' cy='5' r='1.5' fill={value} opacity={0.5}></circle>
+          <circle cx='5' cy='5' r='1.5' fill={value} opacity={0.5} />
         </pattern>
       ))}
     </>

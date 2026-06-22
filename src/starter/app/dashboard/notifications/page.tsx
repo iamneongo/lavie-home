@@ -1,14 +1,7 @@
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/starter/components/ui/card';
 import { Alert, AlertDescription } from '@/starter/components/ui/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/starter/components/ui/card';
 import { Icons } from '@/starter/components/icons';
 import { getOperationalAlerts } from '@/lib/homestay-dashboard';
 
@@ -16,8 +9,8 @@ export const metadata = {
   title: 'Dashboard: Cảnh báo'
 };
 
-export default function NotificationsPage() {
-  const alerts = getOperationalAlerts(8);
+export default async function NotificationsPage() {
+  const alerts = await getOperationalAlerts(8);
 
   return (
     <PageContainer

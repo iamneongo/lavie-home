@@ -28,7 +28,7 @@ import {
 import type { ElementType } from "react";
 import { useMemo, useRef, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
-import { activeBranches, compactPhone, money, Room, roomsByBranch } from "@/lib/tete-data";
+import { compactPhone, money } from "@/lib/format";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -86,8 +86,31 @@ type SelectedSlot = {
   position: number;
 };
 
-export function LavieHomeApp() {
-  const [activeBranchId, setActiveBranchId] = useState(activeBranches[0]?.id ?? 30);
+type Branch = {
+  id: number;
+  name: string;
+  active: number;
+  hotline: string;
+  google_maps_link: string;
+  classic_booking_enabled: number;
+};
+
+type Room = {
+  id: number;
+  branch_id: number;
+  card_name: string;
+  branch_name: string;
+  room_amenities: string[];
+  price_from: number;
+  price_to: number;
+  full_day_price: number;
+  main_image: string;
+  is_classic: number;
+  images: string[];
+};
+
+export function LavieHomeApp({ branches, rooms }: { branches: Branch[]; rooms: Room[] }) {
+  const [activeBranchId, setActiveBranchId] = useState(branches[0]?.id ?? 30);
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
   const [modalRoom, setModalRoom] = useState<Room | null>(null);
   const bookingScrollRef = useRef<HTMLDivElement | null>(null);
@@ -130,12 +153,15 @@ export function LavieHomeApp() {
       { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.08, ease: "power3.out" }
     );
   }, { dependencies: [activeBranchId], scope: containerRef });
-  const branchRooms = useMemo(() => roomsByBranch(activeBranchId), [activeBranchId]);
+  const branchRooms = useMemo(
+    () => rooms.filter((room) => room.branch_id === activeBranchId && room.is_classic === 0),
+    [activeBranchId, rooms]
+  );
   const featuredRooms = branchRooms.slice(0, 10);
   const heroMarqueeRooms = featuredRooms.slice(0, 8);
   const heroLoopRooms = [...heroMarqueeRooms, ...heroMarqueeRooms];
   const calendarRooms = branchRooms.slice(0, 8);
-  const currentBranch = activeBranches.find((branch) => branch.id === activeBranchId) ?? activeBranches[0];
+  const currentBranch = branches.find((branch) => branch.id === activeBranchId) ?? branches[0];
   const dates = useMemo(() => makeDates(), []);
 
   const subtotal = selectedSlots.reduce((sum, slot) => sum + slot.price, 0);
@@ -282,7 +308,7 @@ export function LavieHomeApp() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {activeBranches.map((branch) => {
+            {branches.map((branch) => {
               const parts = branch.name.split(" - ");
               const city = parts[0];
               const address = parts.slice(1).join(" - ") || "Chi nhánh";

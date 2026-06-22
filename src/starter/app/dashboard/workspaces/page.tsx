@@ -3,25 +3,18 @@ import Link from 'next/link';
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
 import { Button, buttonVariants } from '@/starter/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/starter/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/starter/components/ui/card';
 import { Icons } from '@/starter/components/icons';
 import { cn } from '@/starter/lib/utils';
 import { getBranchSummaries } from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { money } from '@/lib/format';
 
 export const metadata = {
   title: 'Dashboard: Chi nhánh'
 };
 
-export default function WorkspacesPage() {
-  const branches = getBranchSummaries(12);
+export default async function WorkspacesPage() {
+  const branches = await getBranchSummaries(12);
   const active = branches.filter((branch) => branch.status === 'Đang mở').length;
 
   return (

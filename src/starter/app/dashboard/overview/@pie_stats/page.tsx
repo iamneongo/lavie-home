@@ -1,8 +1,7 @@
-﻿import { delay } from '@/constants/mock-api';
 import { PieGraph } from '@/starter/features/overview/components/pie-graph';
+import { getBookingStatusSummary } from '@/lib/homestay-dashboard';
 
 export default async function Stats() {
-  await delay(1000);
-  return <PieGraph />;
+  const data = await getBookingStatusSummary(12);
+  return <PieGraph data={data} />;
 }
-

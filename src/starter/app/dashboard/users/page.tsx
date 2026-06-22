@@ -11,15 +11,14 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/starter/components/ui/table';
 import { Icons } from '@/starter/components/icons';
 import { getBookingSnapshots, getGuestSummaries } from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { money } from '@/lib/format';
 
 export const metadata = {
   title: 'Dashboard: Khách lưu trú'
 };
 
-export default function UsersPage() {
-  const guests = getGuestSummaries(8);
-  const bookings = getBookingSnapshots(8);
+export default async function UsersPage() {
+  const [guests, bookings] = await Promise.all([getGuestSummaries(8), getBookingSnapshots(8)]);
 
   return (
     <PageContainer
@@ -55,7 +54,7 @@ export default function UsersPage() {
                 {money(guests.reduce((sum, guest) => sum + guest.totalSpent, 0))}đ
               </CardTitle>
             </CardHeader>
-            <CardFooter className='text-muted-foreground text-sm'>Từ dữ liệu booking mẫu.</CardFooter>
+            <CardFooter className='text-muted-foreground text-sm'>Từ dữ liệu booking thật.</CardFooter>
           </Card>
           <Card>
             <CardHeader>

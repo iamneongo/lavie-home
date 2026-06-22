@@ -11,14 +11,14 @@ import {
 import { Avatar, AvatarFallback } from '@/starter/components/ui/avatar';
 import { Icons } from '@/starter/components/icons';
 import { getBookingSnapshots } from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { money } from '@/lib/format';
 
 export const metadata = {
   title: 'Dashboard: Hộp thư'
 };
 
-export default function ChatPage() {
-  const snapshots = getBookingSnapshots(8);
+export default async function ChatPage() {
+  const snapshots = await getBookingSnapshots(8);
 
   return (
     <PageContainer
@@ -35,7 +35,7 @@ export default function ChatPage() {
         <Card className='lg:col-span-2'>
           <CardHeader>
             <CardTitle>Danh sách hội thoại</CardTitle>
-            <CardDescription>Các yêu cầu đặt phòng gần đây giả lập theo booking mẫu.</CardDescription>
+            <CardDescription>Các yêu cầu đặt phòng gần đây lấy trực tiếp từ booking thật.</CardDescription>
           </CardHeader>
           <CardContent className='space-y-3'>
             {snapshots.map((snapshot) => {

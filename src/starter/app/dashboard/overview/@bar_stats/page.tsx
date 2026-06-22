@@ -1,9 +1,7 @@
-﻿import { delay } from '@/constants/mock-api';
 import { BarGraph } from '@/starter/features/overview/components/bar-graph';
+import { getPriceBands } from '@/lib/homestay-dashboard';
 
 export default async function BarStats() {
-  await delay(1000);
-
-  return <BarGraph />;
+  const data = await getPriceBands();
+  return <BarGraph data={data} />;
 }
-

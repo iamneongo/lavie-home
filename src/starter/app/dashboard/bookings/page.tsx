@@ -3,37 +3,28 @@ import Link from 'next/link';
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
 import { Button, buttonVariants } from '@/starter/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/starter/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/starter/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/starter/components/ui/table';
 import { Icons } from '@/starter/components/icons';
 import { cn } from '@/starter/lib/utils';
-import {
-  getBookingSnapshots,
-  getBookingStatusSummary,
-  getRevenueSummary
-} from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { getBookingSnapshots, getBookingStatusSummary, getRevenueSummary } from '@/lib/homestay-dashboard';
+import { money } from '@/lib/format';
 
 export const metadata = {
   title: 'Dashboard: Booking'
 };
 
-export default function BookingsPage() {
-  const bookings = getBookingSnapshots(12);
-  const statuses = getBookingStatusSummary(12);
-  const revenue = getRevenueSummary(12);
+export default async function BookingsPage() {
+  const [bookings, statuses, revenue] = await Promise.all([
+    getBookingSnapshots(12),
+    getBookingStatusSummary(12),
+    getRevenueSummary(12)
+  ]);
 
   return (
     <PageContainer
       pageTitle='Quản lý booking'
-      pageDescription='Theo dõi booking mẫu, trạng thái xác nhận và doanh thu ước tính cho Lavie Home.'
+      pageDescription='Theo dõi booking thật, trạng thái xác nhận và doanh thu ước tính cho Lavie Home.'
       pageHeaderAction={
         <Link href='/dashboard/overview' className={cn(buttonVariants(), 'text-xs md:text-sm')}>
           <Icons.calendar className='mr-2 h-4 w-4' />
@@ -45,10 +36,10 @@ export default function BookingsPage() {
         <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-4'>
           <Card>
             <CardHeader>
-              <CardDescription>Tổng booking mẫu</CardDescription>
+              <CardDescription>Tổng booking</CardDescription>
               <CardTitle className='text-2xl tabular-nums'>{bookings.length}</CardTitle>
             </CardHeader>
-            <CardFooter className='text-muted-foreground text-sm'>Dữ liệu giả lập từ catalogue hiện tại.</CardFooter>
+            <CardFooter className='text-muted-foreground text-sm'>Dữ liệu lưu trong PostgreSQL.</CardFooter>
           </Card>
           {statuses.map((item) => (
             <Card key={item.status}>
@@ -64,7 +55,7 @@ export default function BookingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Danh sách booking gần đây</CardTitle>
-            <CardDescription>{`Tổng doanh thu mẫu: ${money(revenue.total)}đ`}</CardDescription>
+            <CardDescription>{`Tổng doanh thu: ${money(revenue.total)}đ`}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='overflow-hidden rounded-lg border'>

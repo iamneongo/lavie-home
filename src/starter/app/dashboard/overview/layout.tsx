@@ -2,22 +2,11 @@ import React from 'react';
 
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/starter/components/ui/card';
+import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from '@/starter/components/ui/card';
 import { Icons } from '@/starter/components/icons';
-import {
-  getBookingStatusSummary,
-  getBranchSummaries,
-  getDashboardMetrics
-} from '@/lib/homestay-dashboard';
+import { getBookingStatusSummary, getBranchSummaries, getDashboardMetrics } from '@/lib/homestay-dashboard';
 
-export default function OverViewLayout({
+export default async function OverViewLayout({
   sales,
   pie_stats,
   bar_stats,
@@ -28,9 +17,11 @@ export default function OverViewLayout({
   bar_stats: React.ReactNode;
   area_stats: React.ReactNode;
 }) {
-  const metrics = getDashboardMetrics();
-  const bookingSummary = getBookingStatusSummary(12);
-  const branchSummaries = getBranchSummaries(1);
+  const [metrics, bookingSummary, branchSummaries] = await Promise.all([
+    getDashboardMetrics(),
+    getBookingStatusSummary(12),
+    getBranchSummaries(1)
+  ]);
   const featuredBranch = branchSummaries[0];
 
   return (
@@ -43,8 +34,8 @@ export default function OverViewLayout({
           <div>
             <h2 className='text-2xl font-bold tracking-tight md:text-3xl'>Tổng quan vận hành Lavie Home</h2>
             <p className='text-muted-foreground mt-1 max-w-3xl text-sm leading-6'>
-              Đây là nơi nhìn nhanh tình trạng chi nhánh, phòng đang bán, mức giá và booking mẫu để đồng bộ
-              với nội dung public site.
+              Đây là nơi nhìn nhanh tình trạng chi nhánh, phòng đang bán, mức giá và booking thật để đồng bộ với nội dung
+              public site.
             </p>
           </div>
           <div className='hidden items-center gap-2 md:flex'>
@@ -58,8 +49,10 @@ export default function OverViewLayout({
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
           {metrics.map((metric, index) => {
             const summary = bookingSummary[index % bookingSummary.length];
-            const Icon = index === 0 ? Icons.dashboard : index === 1 ? Icons.product : index === 2 ? Icons.creditCard : Icons.badgeCheck;
-            const note = index === 0 ? 'Booking đang theo dõi' : index === 1 ? 'Phân bổ theo chi nhánh' : index === 2 ? 'Giá khởi điểm trung bình' : 'Nội dung đủ dùng';
+            const Icon =
+              index === 0 ? Icons.dashboard : index === 1 ? Icons.product : index === 2 ? Icons.creditCard : Icons.badgeCheck;
+            const note =
+              index === 0 ? 'Booking đang theo dõi' : index === 1 ? 'Phân bổ theo chi nhánh' : index === 2 ? 'Giá khởi điểm trung bình' : 'Nội dung đủ dùng';
 
             return (
               <Card key={metric.label} className='@container/card'>
@@ -83,7 +76,7 @@ export default function OverViewLayout({
                       </>
                     ) : index === 1 ? (
                       <>
-                        Phân bổ theo chi nhánh <Icons.workspace className='size-4' />
+                        Phân bố theo chi nhánh <Icons.workspace className='size-4' />
                       </>
                     ) : index === 2 ? (
                       <>

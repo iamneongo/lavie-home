@@ -3,25 +3,18 @@ import Link from 'next/link';
 import PageContainer from '@/starter/components/layout/page-container';
 import { Badge } from '@/starter/components/ui/badge';
 import { Button, buttonVariants } from '@/starter/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from '@/starter/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/starter/components/ui/card';
 import { Icons } from '@/starter/components/icons';
 import { cn } from '@/starter/lib/utils';
 import { getRoomSummaries } from '@/lib/homestay-dashboard';
-import { money } from '@/lib/tete-data';
+import { money } from '@/lib/format';
 
 export const metadata = {
   title: 'Dashboard: Phòng'
 };
 
-export default function ProductPage() {
-  const rooms = getRoomSummaries(8);
+export default async function ProductPage() {
+  const rooms = await getRoomSummaries(8);
   const featured = rooms.filter((room) => room.isFeatured).length;
 
   return (
@@ -73,11 +66,7 @@ export default function ProductPage() {
           {rooms.map((room) => (
             <Card key={room.room.id} className='overflow-hidden'>
               <div className='bg-muted aspect-[16/9] w-full overflow-hidden'>
-                <img
-                  src={room.room.main_image}
-                  alt={room.room.card_name}
-                  className='h-full w-full object-cover'
-                />
+                <img src={room.room.main_image} alt={room.room.card_name} className='h-full w-full object-cover' />
               </div>
               <CardHeader>
                 <div className='flex items-start justify-between gap-3'>
@@ -100,7 +89,7 @@ export default function ProductPage() {
                 <div className='text-muted-foreground line-clamp-2'>{room.highlight}</div>
               </CardContent>
               <CardFooter className='flex items-center justify-between gap-2'>
-                <span className='text-muted-foreground text-xs'>Đã đồng bộ với nội dung public</span>
+                <span className='text-muted-foreground text-xs'>Đã đồng bộ với PostgreSQL</span>
                 <Button variant='outline' size='sm' asChild>
                   <Link href='/dashboard/workspaces'>
                     <Icons.workspace className='mr-2 h-4 w-4' />
